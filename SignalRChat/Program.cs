@@ -3,10 +3,24 @@ using SignalRChat.Hubs;
 using SignalRChat.Hubs.Filter;
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      builder =>
+                      {
+                          builder
+                          .AllowAnyHeader()
+                          .AllowCredentials()
+                          .WithOrigins("https://localhost:7169");
+                      });
+});
 
 builder.Services.AddSignalR(options =>
 {
@@ -30,12 +44,13 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapHub<ChatHub>("/chatHub");
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapRazorPages();
     endpoints.MapControllers();
+    endpoints.MapHub<ChatHub>("/chatHub");
 });
 
 app.Run();
