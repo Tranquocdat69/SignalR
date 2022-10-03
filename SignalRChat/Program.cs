@@ -8,6 +8,7 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>

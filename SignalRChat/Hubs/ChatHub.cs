@@ -11,15 +11,6 @@ namespace SignalRChat.Hubs
         private const string secretGroup = "Secret Group";
         private const string KEY = "KEY";
 
-        private UserManager<IdentityUser> _userManager;
-        private IHttpContextAccessor _httpContextAccessor;
-
-        public ChatHub(UserManager<IdentityUser> userManager, IHttpContextAccessor httpContextAccessor)
-        {
-            _userManager = userManager;
-            _httpContextAccessor = httpContextAccessor;
-        }
-
         [HubMethodName("SendMessageToGroup")]
         public async Task SendMessageToGroupAsync(string user, string message)
             => await Clients.Group(secretGroup).NotifyGroup(user, message);
@@ -27,8 +18,9 @@ namespace SignalRChat.Hubs
         [HubMethodName("SendMessageToAllClient")]
         public async Task SendMessageToAllClientAsync(Info info)
         {
-            Context.Items.Add(KEY, "This is value from Context.Items");
-            await Clients.All.ReceiveMessage(new Info() { User = _userManager.GetUserName(_httpContextAccessor.HttpContext.User).ToString(), Message = info.Message, Addition = Context.Items[KEY]?.ToString() ?? String.Empty });
+            //Context.Items.Add(KEY, "This is value from Context.Items");
+            //Addition = Context.Items[KEY]?.ToString() ?? String.Empty
+            await Clients.All.ReceiveMessage(new Info() { User = info.User, Message = info.Message });
         }
 
         [HubMethodName("JoinSecretGroup")]
@@ -38,7 +30,8 @@ namespace SignalRChat.Hubs
         [HubMethodName("SendPrivateMessage")]
         public async Task SendPrivateMessageAsync(string user, string message)
         {
-            await Clients.User(user).ReceivePrivateMessage(new Info() { User = user, Message = message });
+            //await Clients.User(user).ReceivePrivateMessage(new Info() { User = user, Message = message });
+            await Clients.All.ReceiveMessage(new Info() { User = user, Message = message });
         }
 
         public void AbortConnection() => Context.Abort();
